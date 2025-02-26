@@ -730,6 +730,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <option value="Legendary">Legendary</option>
                         </select>
                     </div>
+                    <button type="button" class="trade-in-btn" id="sortBtn"><i class="fas fa-check-square"></i>Sort By Rarity</button>
                     <button type="button" class="select-all-btn" id="selectAllBtn">
                         <i class="fas fa-check-square"></i> Select All Visible
                     </button>
@@ -1347,12 +1348,48 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('search-input');
             const tradeInControls = document.querySelector('.trade-in-controls');
             const selectAllBtn = document.getElementById('selectAllBtn');
+            const sortBtn = document.getElementById('sortBtn');
 
             let currentFilters = {
                 type: '',
                 rarity: '',
                 search: ''
             };
+
+            function sortItemsByRarity() {
+                // Select all items
+                const grid = document.getElementById('equipmentGrid');
+                const equipment = Array.from(grid.querySelectorAll('.equipment-card'));
+
+                // Define the order of rarity
+                const rarityOrder = ['Legendary', 'Epic', 'Rare', 'Uncommon', 'Common'];
+
+                // Sort items
+                equipment.sort((a, b) => {
+                    const rarityA = a.getAttribute('data-rarity');
+                    const rarityB = b.getAttribute('data-rarity');
+
+                    // First, compare rarity
+                    const rarityComparison = rarityOrder.indexOf(rarityA) - rarityOrder.indexOf(rarityB);
+
+                    if (rarityComparison === 0) {
+                        // If rarities are equal, prioritize by 'has-foil' class
+                        const hasFoilA = a.classList.contains('has-foil') ? 1 : 0;
+                        const hasFoilB = b.classList.contains('has-foil') ? 1 : 0;
+                        return hasFoilB - hasFoilA; // Descending order for 'has-foil'
+                    }
+
+                    return rarityComparison;
+                });
+
+                // Clear current content
+                grid.innerHTML = '';
+
+                // Reinsert items in sorted order
+                equipment.forEach(item => grid.appendChild(item));
+            }
+
+            sortBtn.onclick = sortItemsByRarity;
 
             function updateTradeInButton() {
                 const selectedCount = document.querySelectorAll('.trade-in-checkbox:checked').length;
