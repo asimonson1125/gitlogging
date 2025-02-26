@@ -730,6 +730,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             <option value="Legendary">Legendary</option>
                         </select>
                     </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Foils</label>
+                        <select id="foil-filter">
+                            <option value="">Show Regular and Foil</option>
+                            <option value="nofoil">Show Regular</option>
+                            <option value="noregular">Show Foil</option>
+                        </select>
+                    </div>
                     <button type="button" class="trade-in-btn" id="sortBtn"><i class="fas fa-check-square"></i>Sort By Rarity</button>
                     <button type="button" class="select-all-btn" id="selectAllBtn">
                         <i class="fas fa-check-square"></i> Select All Visible
@@ -1345,14 +1353,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('.trade-in-checkbox');
             const typeFilter = document.getElementById('type-filter');
             const rarityFilter = document.getElementById('rarity-filter');
+            const foilFilter = document.getElementById('foil-filter');
             const searchInput = document.getElementById('search-input');
             const tradeInControls = document.querySelector('.trade-in-controls');
             const selectAllBtn = document.getElementById('selectAllBtn');
             const sortBtn = document.getElementById('sortBtn');
 
-            let currentFilters = {
+            let currentFilters = { // Unused??
                 type: '',
                 rarity: '',
+                foil: '',
                 search: ''
             };
 
@@ -1401,6 +1411,7 @@ document.addEventListener('DOMContentLoaded', function() {
             function filterEquipment() {
                 const selectedType = typeFilter.value.toLowerCase();
                 const selectedRarity = rarityFilter.value.toLowerCase();
+                const selectedFoils = foilFilter.value;
                 const searchTerm = searchInput.value.toLowerCase();
                 const cards = document.querySelectorAll('.equipment-card');
 
@@ -1408,12 +1419,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     const cardType = card.getAttribute('data-type').toLowerCase();
                     const cardRarity = card.getAttribute('data-rarity').toLowerCase();
                     const cardName = card.querySelector('.equipment-name').textContent.toLowerCase();
+                    const cardFoil = card.classList.contains('has-foil');
                     
                     const typeMatch = !selectedType || cardType === selectedType;
                     const rarityMatch = !selectedRarity || cardRarity === selectedRarity;
                     const searchMatch = !searchTerm || cardName.includes(searchTerm);
+
+                    let foilCriteria = true;
+                    if (selectedFoils == 'nofoil') foilCriteria = cardFoil ? false : true;
+                    if (selectedFoils == 'noregular') foilCriteria = cardFoil ? true : false;
                     
-                    card.style.display = typeMatch && rarityMatch && searchMatch ? 'block' : 'none';
+                    card.style.display = foilCriteria && typeMatch && rarityMatch && searchMatch ? 'block' : 'none';
                 });
 
                 // Update select all button state after filtering
@@ -1474,6 +1490,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentFilters.rarity = rarityFilter.value;
                 filterEquipment();
             });
+
+            foilFilter.onchange = filterEquipment;
 
             searchInput.addEventListener('input', () => {
                 currentFilters.search = searchInput.value;
